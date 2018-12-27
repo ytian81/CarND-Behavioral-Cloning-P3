@@ -1,6 +1,7 @@
 from keras.callbacks import ModelCheckpoint
 from keras.layers import Activation, Conv2D, Dense, Dropout, Flatten, Lambda, MaxPool2D
 from keras.models import Sequential
+from keras.regularizers import l2
 from scipy import ndimage
 
 import csv
@@ -33,17 +34,20 @@ X_train, y_train = get_data()
 def assemble_model():
     # Assemble model
     input_shape = (160, 320, 3)
+    regularizer_coef = 1e-3
 
     model = Sequential()
     model.add(Lambda(lambda x:(x / 255.0)-0.5, input_shape=input_shape))
 
     # Conv layer 1
-    model.add(Conv2D(filters=6, kernel_size=5, strides=1, padding='valid'))
+    model.add(Conv2D(filters=6, kernel_size=5, strides=1, padding='valid',
+        kernel_regularizer=l2(regularizer_coef)))
     model.add(Activation('relu'))
     model.add(MaxPool2D(pool_size=2, strides=None, padding='valid'))
 
     # Conv layer 2
-    model.add(Conv2D(filters=16, kernel_size=5, strides=1, padding='valid'))
+    model.add(Conv2D(filters=16, kernel_size=5, strides=1, padding='valid',
+        kernel_regularizer=l2(regularizer_coef)))
     model.add(Activation('relu'))
     model.add(MaxPool2D(pool_size=2, strides=None, padding='valid'))
 
@@ -51,17 +55,17 @@ def assemble_model():
     model.add(Flatten())
 
     # Fully connected layer 3
-    model.add(Dense(120))
+    model.add(Dense(120, kernel_regularizer=l2(regularizer_coef)))
     model.add(Activation('relu'))
     model.add(Dropout(0.5))
 
     # Fully connected layer 4
-    model.add(Dense(84))
+    model.add(Dense(84, kernel_regularizer=l2(regularizer_coef)))
     model.add(Activation('relu'))
     model.add(Dropout(0.5))
 
     # Fully connected layer 5
-    model.add(Dense(1))
+    model.add(Dense(1, kernel_regularizer=l2(regularizer_coef)))
 
     return model
 
