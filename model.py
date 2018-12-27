@@ -15,7 +15,7 @@ def get_data():
         for line in reader:
             lines.append(line)
 
-    # Modify image path and extrac outputs
+    # Modify image path and extract outputs
     images = []
     steering_angles = []
     for line in lines:
@@ -78,4 +78,4 @@ model = assemble_model()
 model.compile(loss='mse', optimizer='adam')
 # Train 10 epoches and save the best model
 checkpoint = ModelCheckpoint('model.h5', monitor='val_loss', save_best_only=True, mode='min', verbose=0)
-model.fit(X_train, y_train, validation_split=0.3, shuffle=True, epochs=10, callbacks=[checkpoint])
+model.fit(X_train, y_train, validation_split=0.3, shuffle=True, epochs=15, callbacks=[checkpoint])
