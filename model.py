@@ -1,5 +1,5 @@
 from keras.callbacks import ModelCheckpoint
-from keras.layers import Activation, Conv2D, Dense, Flatten, Lambda, MaxPool2D
+from keras.layers import Activation, Conv2D, Dense, Dropout, Flatten, Lambda, MaxPool2D
 from keras.models import Sequential
 from scipy import ndimage
 
@@ -53,10 +53,12 @@ def assemble_model():
     # Fully connected layer 3
     model.add(Dense(120))
     model.add(Activation('relu'))
+    model.add(Dropout(0.5))
 
     # Fully connected layer 4
     model.add(Dense(84))
     model.add(Activation('relu'))
+    model.add(Dropout(0.5))
 
     # Fully connected layer 5
     model.add(Dense(1))
@@ -68,6 +70,5 @@ model = assemble_model()
 # Train and save model
 model.compile(loss='mse', optimizer='adam')
 # Train 10 epoches and save the best model
-
 checkpoint = ModelCheckpoint('naive_model.h5', monitor='val_loss', save_best_only=True, mode='min', verbose=1)
 model.fit(X_train, y_train, validation_split=0.2, shuffle=True, epochs=2, callbacks=[checkpoint])
