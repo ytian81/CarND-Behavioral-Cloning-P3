@@ -3,6 +3,7 @@ from keras.layers import Activation, Conv2D, Dense, Dropout, Flatten, Lambda, Ma
 from keras.models import Sequential
 from keras.regularizers import l2
 from scipy import ndimage
+from sklearn.utils import shuffle
 
 import csv
 import numpy as np
@@ -30,7 +31,12 @@ def get_data():
         images.append(np.fliplr(image))
         steering_angles.append(-steering_angle)
 
-    return np.array(images), np.array(steering_angles)
+    images = np.array(images)
+    steering_angles = np.array(steering_angles)
+
+    # shuffle data before split validation set
+    images, steering_angles = shuffle(images, steering_angles)
+    return images, steering_angles
 
 X_train, y_train = get_data()
 
