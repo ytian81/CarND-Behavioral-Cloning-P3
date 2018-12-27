@@ -1,5 +1,5 @@
 from keras.callbacks import ModelCheckpoint
-from keras.layers import Activation, Conv2D, Dense, Dropout, Flatten, Lambda, MaxPool2D
+from keras.layers import Activation, Conv2D, Cropping2D, Dense, Dropout, Flatten, Lambda, MaxPool2D
 from keras.models import Sequential
 from keras.regularizers import l2
 from scipy import ndimage
@@ -51,6 +51,7 @@ def assemble_model():
 
     model = Sequential()
     model.add(Lambda(lambda x:(x / 255.0)-0.5, input_shape=input_shape))
+    model.add(Cropping2D(cropping=((70,25),(0,0))))
 
     # Conv layer 1
     model.add(Conv2D(filters=6, kernel_size=5, strides=1, padding='valid',
