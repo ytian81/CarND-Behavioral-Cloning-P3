@@ -19,17 +19,21 @@ def get_data():
     # Modify image path and extract outputs
     images = []
     steering_angles = []
+    delta = 0.2
     for line in lines:
-        image_path = line[0]
-        image_path = './data/IMG/' + image_path.split('/')[-1]
-        image = ndimage.imread(image_path)
-        images.append(image)
-        steering_angle = float(line[3])
-        steering_angles.append(steering_angle)
+        # Use center, left and right images
+        angle_corrections = [0.0, delta, -delta]
+        for idx in range(3):
+            image_path = line[idx]
+            image_path = './data/IMG/' + image_path.split('/')[-1]
+            image = ndimage.imread(image_path)
+            images.append(image)
+            steering_angle = float(line[3]) + angle_corrections[idx]
+            steering_angles.append(steering_angle)
 
-        # Augment data (double the amount of data)
-        images.append(np.fliplr(image))
-        steering_angles.append(-steering_angle)
+            # Augment data (double the amount of data)
+            images.append(np.fliplr(image))
+            steering_angles.append(-steering_angle)
 
     images = np.array(images)
     steering_angles = np.array(steering_angles)
