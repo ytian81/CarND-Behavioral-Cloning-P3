@@ -70,5 +70,5 @@ model = assemble_model()
 # Train and save model
 model.compile(loss='mse', optimizer='adam')
 # Train 10 epoches and save the best model
-checkpoint = ModelCheckpoint('naive_model.h5', monitor='val_loss', save_best_only=True, mode='min', verbose=1)
-model.fit(X_train, y_train, validation_split=0.2, shuffle=True, epochs=2, callbacks=[checkpoint])
+checkpoint = ModelCheckpoint('model.h5', monitor='val_loss', save_best_only=True, mode='min', verbose=0)
+model.fit(X_train, y_train, validation_split=0.3, shuffle=True, epochs=10, callbacks=[checkpoint])
