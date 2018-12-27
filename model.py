@@ -23,9 +23,12 @@ def get_data():
         image_path = './data/IMG/' + image_path.split('/')[-1]
         image = ndimage.imread(image_path)
         images.append(image)
-
         steering_angle = float(line[3])
         steering_angles.append(steering_angle)
+
+        # Augment data (double the amount of data)
+        images.append(np.fliplr(image))
+        steering_angles.append(-steering_angle)
 
     return np.array(images), np.array(steering_angles)
 
