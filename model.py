@@ -1,4 +1,4 @@
-from keras.callbacks import ModelCheckpoint
+from keras.callbacks import EarlyStopping, ModelCheckpoint
 from keras.layers import Activation, Conv2D, Cropping2D, Dense, Dropout, Flatten, Lambda, MaxPool2D
 from keras.models import Sequential
 from keras.regularizers import l2
@@ -6,6 +6,7 @@ from scipy import ndimage
 from sklearn.utils import shuffle
 
 import csv
+import matplotlib.pyplot as plt
 import numpy as np
 
 def get_data():
@@ -87,6 +88,17 @@ model = assemble_model()
 
 # Train and save model
 model.compile(loss='mse', optimizer='adam')
-# Train 10 epoches and save the best model
+# Train 15 epoches at most and save the best model, early stop if validation loss stops improving
 checkpoint = ModelCheckpoint('model.h5', monitor='val_loss', save_best_only=True, mode='min', verbose=0)
-model.fit(X_train, y_train, validation_split=0.3, shuffle=True, epochs=15, callbacks=[checkpoint])
+earlystop = EarlyStopping(monitor='val_loss', patience=3, mode='min')
+history_object = model.fit(X_train, y_train, validation_split=0.3, shuffle=True, epochs=15,
+        callbacks=[checkpoint, earlystop])
+
+# Draw training statistics
+plt.plot(history_object.history['loss'])
+plt.plot(history_object.history['val_loss'])
+plt.title('model mean squared error loss')
+plt.ylabel('mean squared error loss')
+plt.xlabel('epoch')
+plt.legend(['training set', 'validation set'], loc='upper right')
+plt.savefig('training_stats.jpg')
