@@ -7,10 +7,13 @@ import csv
 import matplotlib.pyplot as plt
 import numpy as np
 
+data_folder = './data/'
+#  data_folder = './Track/'
+
 def get_data():
     # Read driving log data from csv file
     lines = []
-    with open('./Track2/driving_log.csv') as f:
+    with open(data_folder+'/driving_log.csv') as f:
         reader = csv.reader(f)
         for line in reader:
             lines.append(line)
@@ -24,7 +27,7 @@ def get_data():
         angle_corrections = [0.0, delta, -delta]
         for idx in range(3):
             image_path = line[idx]
-            image_path = './Track2/IMG/' + image_path.split('/')[-1]
+            image_path = data_folder + '/IMG/' + image_path.split('/')[-1]
             image = ndimage.imread(image_path)
             images.append(image)
             steering_angle = float(line[3]) + angle_corrections[idx]
@@ -43,7 +46,9 @@ def get_data():
 
 X_train, y_train = get_data()
 
-model = load_model('generator_model.h5')
+input_shape = (160, 320, 3)
+regularizer_coef = 1e-3
+model = load_model('best_model.h5')
 
 # Train 15 epoches at most and save the best model, early stop if validation loss stops improving
 checkpoint = ModelCheckpoint('model.h5', monitor='val_loss', save_best_only=True, mode='min', verbose=0)
