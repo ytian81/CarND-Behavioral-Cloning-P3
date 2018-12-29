@@ -1,11 +1,5 @@
 # **Behavioral Cloning** 
 
-## Writeup Template
-
-### You can use this file as a template for your writeup if you want to submit it as a markdown file, but feel free to use some other method and submit a pdf if you prefer.
-
----
-
 **Behavioral Cloning Project**
 
 The goals / steps of this project are the following:
@@ -16,18 +10,11 @@ The goals / steps of this project are the following:
 * Summarize the results with a written report
 
 
-[//]: # (Image References)
+[//]: # "Image References"
 
-[image1]: ./examples/placeholder.png "Model Visualization"
-[image2]: ./examples/placeholder.png "Grayscaling"
-[image3]: ./examples/placeholder_small.png "Recovery Image"
-[image4]: ./examples/placeholder_small.png "Recovery Image"
-[image5]: ./examples/placeholder_small.png "Recovery Image"
-[image6]: ./examples/placeholder_small.png "Normal Image"
-[image7]: ./examples/placeholder_small.png "Flipped Image"
-
-## Rubric Points
-### Here I will consider the [rubric points](https://review.udacity.com/#!/rubrics/432/view) individually and describe how I addressed each point in my implementation.  
+[image1]: ./examples/model.png "Model Visualization"
+[image2]: ./examples/center.jpg "Center driving"
+[image3]: ./examples/recover.jpg "Recovery driving"
 
 ---
 ### Files Submitted & Code Quality
@@ -38,7 +25,8 @@ My project includes the following files:
 * model.py containing the script to create and train the model
 * drive.py for driving the car in autonomous mode
 * model.h5 containing a trained convolution neural network 
-* writeup_report.md or writeup_report.pdf summarizing the results
+* writeup_report.md summarizing the results
+* video.mp4 recording a autonomous driving on track 1 by the trained neural networks
 
 #### 2. Submission includes functional code
 Using the Udacity provided simulator and my drive.py file, the car can be driven autonomously around the track by executing 
@@ -46,84 +34,117 @@ Using the Udacity provided simulator and my drive.py file, the car can be driven
 python drive.py model.h5
 ```
 
+Note: The model is only suitable for driving on track 1
+
 #### 3. Submission code is usable and readable
 
 The model.py file contains the code for training and saving the convolution neural network. The file shows the pipeline I used for training and validating the model, and it contains comments to explain how the code works.
+
+I tried Python generator to provide data on the fly. From my perspective, it helps avoid the problem of fitting too much data into memory at once. But it also introduces great time lag to training on GPU becuase at each training cycle, a batch of data needs to be read from hard drive and piped to GPU memory by CPU. In general, I wouldn't recommend use Python generator when data size is not large.
 
 ### Model Architecture and Training Strategy
 
 #### 1. An appropriate model architecture has been employed
 
-My model consists of a convolution neural network with 3x3 filter sizes and depths between 32 and 128 (model.py lines 18-24) 
+My model is exatly LeNet. It is effective enough to solve autonomous driving on track 1. It has one convolutional layer (6 fitlers, 5x5 kernel size, 1 strides and valid padding) followed by another convolutional layer (16 filters, 5x5 kernel size, 1 strides and valid padding). Each of them uses ReLU activation layer and max pooling (2x2 size and strides and valid padding). After convolutional layer, two fully connected layer of depth 120 and 84, respectively, are joined to combine all feature maps. These two layers also use ReLU activation layer. Finally another fully connected layer of 1 unit outputs final result. 
 
-The model includes RELU layers to introduce nonlinearity (code line 20), and the data is normalized in the model using a Keras lambda layer (code line 18). 
+Normalization by keras Lambda layer is introduced to normalize date to [-0.5, 0.5]. Cropping layer is also used to focus on road instead of sky and trees.
 
 #### 2. Attempts to reduce overfitting in the model
 
-The model contains dropout layers in order to reduce overfitting (model.py lines 21). 
+When training, I find the training loss and validation loss as follows: 
 
-The model was trained and validated on different data sets to ensure that the model was not overfitting (code line 10-16). The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track.
+```sh
+Epoch 1/10
+4748/4748 [==============================] - 493s 104ms/step - loss: 0.1324 - val_loss: 0.0143
+Epoch 2/10
+4748/4748 [==============================] - 497s 105ms/step - loss: 0.0097 - val_loss: 0.0125
+Epoch 3/10
+4748/4748 [==============================] - 495s 104ms/step - loss: 0.0072 - val_loss: 0.0105
+Epoch 4/10
+4748/4748 [==============================] - 499s 105ms/step - loss: 0.0052 - val_loss: 0.0103
+Epoch 5/10
+4748/4748 [==============================] - 497s 105ms/step - loss: 0.0042 - val_loss: 0.0105
+Epoch 6/10
+4748/4748 [==============================] - 497s 105ms/step - loss: 0.0033 - val_loss: 0.0104
+Epoch 7/10
+4748/4748 [==============================] - 498s 105ms/step - loss: 0.0025 - val_loss: 0.0111
+Epoch 8/10
+4748/4748 [==============================] - 501s 105ms/step - loss: 0.0019 - val_loss: 0.0110
+Epoch 9/10
+4748/4748 [==============================] - 498s 105ms/step - loss: 0.0014 - val_loss: 0.0109
+Epoch 10/10
+4748/4748 [==============================] - 499s 105ms/step - loss: 9.2083e-04 - val_loss: 0.0119
+```
+
+As you can see, training loss is order of magnitude less than validation less, which is a great manifesto of overfitting. 
+
+To reduce overfitting, I used both dropout and L2 regularization. Training loss is almost the same as validation loss.
+
+```sh
+4155/4155 [==============================] - 13s - loss: 0.4236 - val_loss: 0.1731
+Epoch 2/10
+4155/4155 [==============================] - 11s - loss: 0.1404 - val_loss: 0.1176
+Epoch 3/10
+4155/4155 [==============================] - 11s - loss: 0.1036 - val_loss: 0.0930
+Epoch 4/10
+4155/4155 [==============================] - 11s - loss: 0.0849 - val_loss: 0.0791
+Epoch 5/10
+4155/4155 [==============================] - 11s - loss: 0.0730 - val_loss: 0.0706
+Epoch 6/10
+4155/4155 [==============================] - 11s - loss: 0.0642 - val_loss: 0.0615
+Epoch 7/10
+4155/4155 [==============================] - 11s - loss: 0.0574 - val_loss: 0.0560
+Epoch 8/10
+4155/4155 [==============================] - 11s - loss: 0.0528 - val_loss: 0.0523
+Epoch 9/10
+4155/4155 [==============================] - 11s - loss: 0.0482 - val_loss: 0.0480
+Epoch 10/10
+4155/4155 [==============================] - 11s - loss: 0.0452 - val_loss: 0.0447
+```
 
 #### 3. Model parameter tuning
 
-The model used an adam optimizer, so the learning rate was not tuned manually (model.py line 25).
+The model used an adam optimizer, so the learning rate was not tuned manually. I use the default batch size set by keras as 32. Validation split ratio is chosen as 0.3 because it is provided by the instructor. L2 regularization coefficient is set as 1e-3 which turns out to be good. I tune the number of epoch from 10 to 15 because sometimes I think the validation loss can continue decreasing after 10 epoches. Also I use early stopping to prevent unnecessary training.
 
 #### 4. Appropriate training data
 
-Training data was chosen to keep the vehicle driving on the road. I used a combination of center lane driving, recovering from the left and right sides of the road ... 
+Training data was captured when I drive the vehicle on both tracks. I tried to keep the vehicle driving along the center line. (Using mouse to control is a great tip!). When training networks, I augument data by flipping the image and take the negative value of steering angle. I also use both left and right camera images and adjut their steering angles by 0.2.
 
-For details about how I created the training data, see the next section. 
+More importantly, I provide training data of recovering from either left or right boundary to the center line. These data are cruical because it could teach the car how to deal with sharp turns.
 
 ### Model Architecture and Training Strategy
 
 #### 1. Solution Design Approach
 
-The overall strategy for deriving a model architecture was to ...
+I started with a simple neural networks of one hidden layer (ReLu activation) with 128 units. No convolution was involved. The whole point of this network was to build the pipeline of data collection, model training and validation. It turned out this simple networks could drive the car on track 1. But it was extremely bad. Steering angle changed erratically. 
 
-My first step was to use a convolution neural network model similar to the ... I thought this model might be appropriate because ...
+Then I tried LeNet to introduce convolutional neural networks because CNN is better for handling images. With the exact architeture of LeNet, the model could somehow smoothly drive car on track 1. However, I found the training loss is order of magnitude less than validation loss. It was overfitting! I used both Dropout(0.5) and L2 regularization (1e-3 coefficient) to attack overfitting. After architeture modification, the car could smoothly drive along the center line. But it still had problem of going through sharp turns. 
 
-In order to gauge how well the model was working, I split my image and steering angle data into a training and validation set. I found that my first model had a low mean squared error on the training set but a high mean squared error on the validation set. This implied that the model was overfitting. 
+I also noticed car constantly turned left even it was supposed to go straight. Clearly, it was due to unbalanced training data. The training data were all about counter-clockwise driving, where left turn is superior to right turn. To balance training data, I flipped the training image and took additive inverse of steering angle (-steering angle). At this time, I realized 10 epoches may not enough because validation loss seemed to continue decrease after 10 epoches. So I changed the number of epoches to 15 and add early stopping using Keras module.
 
-To combat the overfitting, I modified the model so that ...
+Car behavior was slightly better than previously. But it still could not finish sharp turn. Sharp turn was hard because it requires car recovers from side to center very quickly. There are two strategies I used to combat this problem: 1. using both left and right camera images and adjust steering angle accordingly. 2. collecting more data when I manually recover the car from side to center. The first one makes sense becasuse left and right cameras were mounted off from the center. If we pretend center camera is mounted at left(right) camera position, we need larger(less) steering angle.
 
-Then I ... 
+Car now could finish laps successfully, even for sharp turns. At this time I also tried cropping the image because top 70 pixels are mostly sky and trees, and bottom 25 pixels are mostly car hood, which are irrelevant to driving behavior. Including cropping layer, I could reduce the model size from 60M to 22M.
 
-The final step was to run the simulator to see how well the car was driving around track one. There were a few spots where the vehicle fell off the track... to improve the driving behavior in these cases, I ....
-
-At the end of the process, the vehicle is able to drive autonomously around the track without leaving the road.
+In the end, I tried Python generator to feed data on the fly and fine tune on data collected from track 2. It showed no substantial improvement.
 
 #### 2. Final Model Architecture
 
-The final model architecture (model.py lines 18-24) consisted of a convolution neural network with the following layers and layer sizes ...
+The final model architecture consisted of a convolution neural network with the following layers and layer sizes. The first layer is normalization layer which can map image data to [-0.5, 0.5]. The second layer is a cropping layer so that top 70 and bottom 25 pixels are discarded because they are useless information. The thid layer is a convolutional layer with 6 5x5 filters, 1 stride and valid padding followed by ReLu and 2x2 max pooling layer. The fourth layer is also a convolutional layer with 16 5x5 filters, 1 stride and valid padding followed by ReLu and 2x2 max pooling layer. The fifth and sixth layer are fully connected layer of depth 120 and 84, both of which followed by ReLu and drop out layer. The output layer is a fully connected layer to single unit output.
 
-Here is a visualization of the architecture (note: visualizing the architecture is optional according to the project rubric)
+Here is a visualization of the architecture.
 
 ![alt text][image1]
 
-#### 3. Creation of the Training Set & Training Process
+#### 3. Creation of the Training Set
 
 To capture good driving behavior, I first recorded two laps on track one using center lane driving. Here is an example image of center lane driving:
 
 ![alt text][image2]
 
-I then recorded the vehicle recovering from the left side and right sides of the road back to center so that the vehicle would learn to .... These images show what a recovery looks like starting from ... :
+I then recorded the vehicle recovering from side back to center so that the vehicle would learn to how to deal with sharp turns. These images show what a recovery looks like.
 
 ![alt text][image3]
-![alt text][image4]
-![alt text][image5]
 
-Then I repeated this process on track two in order to get more data points.
-
-To augment the data sat, I also flipped images and angles thinking that this would ... For example, here is an image that has then been flipped:
-
-![alt text][image6]
-![alt text][image7]
-
-Etc ....
-
-After the collection process, I had X number of data points. I then preprocessed this data by ...
-
-
-I finally randomly shuffled the data set and put Y% of the data into a validation set. 
-
-I used this training data for training the model. The validation set helped determine if the model was over or under fitting. The ideal number of epochs was Z as evidenced by ... I used an adam optimizer so that manually training the learning rate wasn't necessary.
+As shown above, the top 70 and bottom 25 pixels are almost useless because sky and trees will not deteremine driving behavior.
