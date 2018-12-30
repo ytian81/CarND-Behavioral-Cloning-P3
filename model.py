@@ -1,6 +1,7 @@
 from keras.callbacks import EarlyStopping, ModelCheckpoint
 from keras.layers import Activation, Conv2D, Cropping2D, Dense, Dropout, Flatten, Lambda, MaxPool2D
 from keras.models import Sequential
+from keras.optimizers import Adam
 from keras.regularizers import l2
 from math import ceil
 from scipy import ndimage
@@ -124,7 +125,8 @@ def assemble_model():
 model = assemble_model()
 
 # Train and save model
-model.compile(loss='mse', optimizer='adam')
+adam = Adam(lr=5e-4)
+model.compile(loss='mse', optimizer=adam)
 # Train 15 epoches at most and save the best model, early stop if validation loss stops improving
 checkpoint = ModelCheckpoint('model.h5', monitor='val_loss', save_best_only=True, mode='min', verbose=0)
 earlystop = EarlyStopping(monitor='val_loss', patience=3, mode='min')
