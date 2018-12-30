@@ -72,31 +72,51 @@ def assemble_model():
     model.add(Cropping2D(cropping=((70,25),(0,0))))
 
     # Conv layer 1
-    model.add(Conv2D(filters=6, kernel_size=5, strides=1, padding='valid',
+    model.add(Conv2D(filters=24, kernel_size=5, strides=2, padding='valid',
         kernel_regularizer=l2(regularizer_coef)))
     model.add(Activation('relu'))
-    model.add(MaxPool2D(pool_size=2, strides=None, padding='valid'))
+    #  model.add(MaxPool2D(pool_size=2, strides=None, padding='valid'))
 
     # Conv layer 2
-    model.add(Conv2D(filters=16, kernel_size=5, strides=1, padding='valid',
+    model.add(Conv2D(filters=36, kernel_size=5, strides=2, padding='valid',
         kernel_regularizer=l2(regularizer_coef)))
     model.add(Activation('relu'))
-    model.add(MaxPool2D(pool_size=2, strides=None, padding='valid'))
+    #  model.add(MaxPool2D(pool_size=2, strides=None, padding='valid'))
+
+    # Conv layer 3
+    model.add(Conv2D(filters=48, kernel_size=5, strides=2, padding='valid',
+        kernel_regularizer=l2(regularizer_coef)))
+    model.add(Activation('relu'))
+
+    # Conv layer 4
+    model.add(Conv2D(filters=64, kernel_size=3, strides=1, padding='valid',
+        kernel_regularizer=l2(regularizer_coef)))
+    model.add(Activation('relu'))
+
+    # Conv layer 5
+    model.add(Conv2D(filters=64, kernel_size=3, strides=1, padding='valid',
+        kernel_regularizer=l2(regularizer_coef)))
+    model.add(Activation('relu'))
 
     # Flatten
     model.add(Flatten())
 
-    # Fully connected layer 3
-    model.add(Dense(120, kernel_regularizer=l2(regularizer_coef)))
+    # Fully connected layer 6
+    model.add(Dense(100, kernel_regularizer=l2(regularizer_coef)))
     model.add(Activation('relu'))
     model.add(Dropout(0.5))
 
-    # Fully connected layer 4
-    model.add(Dense(84, kernel_regularizer=l2(regularizer_coef)))
+    # Fully connected layer 7
+    model.add(Dense(50, kernel_regularizer=l2(regularizer_coef)))
     model.add(Activation('relu'))
     model.add(Dropout(0.5))
 
-    # Fully connected layer 5
+    # Fully connected layer 8
+    model.add(Dense(10, kernel_regularizer=l2(regularizer_coef)))
+    model.add(Activation('relu'))
+    model.add(Dropout(0.5))
+
+    # Fully connected layer 9
     model.add(Dense(1, kernel_regularizer=l2(regularizer_coef)))
 
     return model
