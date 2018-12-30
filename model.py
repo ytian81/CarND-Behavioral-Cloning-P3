@@ -16,17 +16,23 @@ def get_data():
     # Read driving log data from csv file, augment data by lazy flipping and using left and right images
     samples = []
     delta = 0.2
+    keep_zero_ratio = 0.15
     angle_corrections = [0.0, delta, -delta]
     with open('./data/driving_log.csv') as f:
         reader = csv.reader(f)
         for line in reader:
+            steering_angle = float(line[3])
+            # Only keep 15% of 0 steering angle data
+            if (abs(steering_angle) < 1e-3) and (np.random.uniform() > keep_zero_ratio):
+                continue
+
             # Use center, left and right images
             for idx in range(3):
                 # Original image
-                sample = [line[idx], (float(line[3])+angle_corrections[idx]), False]
+                sample = [line[idx], (steering_angle+angle_corrections[idx]), False]
                 samples.append(sample)
                 # Flipped image
-                sample = [line[idx], -(float(line[3])+angle_corrections[idx]), True]
+                sample = [line[idx], -(steering_angle+angle_corrections[idx]), True]
                 samples.append(sample)
     return samples
 
