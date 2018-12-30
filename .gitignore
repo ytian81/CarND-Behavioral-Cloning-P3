@@ -5,3 +5,4 @@ data.zip
 *.swp
 training_stats.jpg
 __pycache__/
+turn/
