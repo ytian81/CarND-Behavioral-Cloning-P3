@@ -6,13 +6,15 @@ from keras.callbacks import EarlyStopping, ModelCheckpoint
 from keras.models import load_model
 from scipy import ndimage
 from sklearn.utils import shuffle
+from model import assemble_model
 
 import csv
 import matplotlib.pyplot as plt
 import numpy as np
 
 # data_folder = './data/'
-data_folder = './Track2/'
+#  data_folder = './Track2/'
+data_folder = './turn/'
 
 def get_data():
     # Read driving log data from csv file
@@ -50,47 +52,8 @@ def get_data():
 
 X_train, y_train = get_data()
 
-def assemble_model():
-    # Assemble model
-    input_shape = (160, 320, 3)
-    regularizer_coef = 1e-3
-
-    model = Sequential()
-    model.add(Lambda(lambda x:(x / 255.0)-0.5, input_shape=input_shape))
-    model.add(Cropping2D(cropping=((70,25),(0,0))))
-
-    # Conv layer 1
-    model.add(Conv2D(filters=6, kernel_size=5, strides=1, padding='valid',
-        kernel_regularizer=l2(regularizer_coef)))
-    model.add(Activation('relu'))
-    model.add(MaxPool2D(pool_size=2, strides=None, padding='valid'))
-
-    # Conv layer 2
-    model.add(Conv2D(filters=16, kernel_size=5, strides=1, padding='valid',
-        kernel_regularizer=l2(regularizer_coef)))
-    model.add(Activation('relu'))
-    model.add(MaxPool2D(pool_size=2, strides=None, padding='valid'))
-
-    # Flatten
-    model.add(Flatten())
-
-    # Fully connected layer 3
-    model.add(Dense(120, kernel_regularizer=l2(regularizer_coef)))
-    model.add(Activation('relu'))
-    model.add(Dropout(0.5))
-
-    # Fully connected layer 4
-    model.add(Dense(84, kernel_regularizer=l2(regularizer_coef)))
-    model.add(Activation('relu'))
-    model.add(Dropout(0.5))
-
-    # Fully connected layer 5
-    model.add(Dense(1, kernel_regularizer=l2(regularizer_coef)))
-
-    return model
-
 model = assemble_model()
-model.load_weights('best_model.h5')
+model.load_weights('batch_128_model.h5')
 
 model.compile(loss='mse', optimizer='adam')
 # Train 15 epoches at most and save the best model, early stop if validation loss stops improving
